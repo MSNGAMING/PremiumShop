@@ -1,0 +1,81 @@
+# PremiumShop Configuration
+# --------------------------
+
+database:
+  type: SQLITE  # SQLITE or MYSQL
+  sqlite:
+    file: premiumshop.db
+  mysql:
+    host: localhost
+    port: 3306
+    database: premiumshop
+    username: root
+    password: password
+    pool-size: 10
+    connection-timeout: 30000
+    idle-timeout: 600000
+    max-lifetime: 1800000
+
+economy:
+  type: VAULT  # VAULT or ITEM
+  item-currency:
+    material: DIAMOND
+    display-name: "&bDiamond"
+    custom-model-data: 0
+
+dynamic-pricing:
+  enabled: true
+  decay-constant-k: 0.001
+  update-interval-ticks: 6000
+  min-price-multiplier: 0.1
+  max-price-multiplier: 10.0
+  velocity-weight: 0.3
+  stock-weight: 0.7
+
+shop:
+  default-shop: main
+  max-categories: 27
+  items-per-page: 45
+  sell-multiplier: 0.75
+  enable-sell-all: true
+  confirm-purchases: true
+  confirm-threshold: 1000.0
+
+auction:
+  max-listings-per-player: 5
+  min-duration-hours: 1
+  max-duration-hours: 168
+  default-duration-hours: 24
+  listing-fee-percent: 2.0
+  min-bid-increment-percent: 5.0
+  extend-on-bid-seconds: 30
+  mail-on-outbid: true
+  claim-expiry-days: 7
+
+gui:
+  animation-ticks: 2
+  use-animations: true
+  close-on-outside-click: false
+
+messages:
+  prefix: "&8[&6PremiumShop&8] &r"
+  no-permission: "&cYou don't have permission to do this."
+  player-only: "&cOnly players can use this command."
+  reload-success: "&aConfiguration reloaded successfully."
+  insufficient-funds: "&cYou don't have enough funds. Required: &e{price}&c."
+  purchase-success: "&aSuccessfully purchased &e{amount}x {item} &afor &e{price}&a."
+  sell-success: "&aSuccessfully sold &e{amount}x {item} &afor &e{price}&a."
+  auction-listed: "&aYour &e{item} &ahas been listed on the auction house!"
+  auction-bid-placed: "&aYou placed a bid of &e{bid} &aon &e{item}&a."
+  auction-outbid: "&cYou were outbid on &e{item}&c. Your bid of &e{bid} &chas been returned."
+  auction-won: "&aYou won the auction for &e{item} &awith a bid of &e{bid}&a!"
+  auction-sold: "&aYour &e{item} &awas sold for &e{price}&a!"
+  auction-expired: "&eYour &b{item} &elisting has expired. Claim it at the auction house."
+  editor-mode-enabled: "&aAdmin editor mode &2ENABLED&a. Click items to edit them."
+  editor-mode-disabled: "&cAdmin editor mode &4DISABLED&c."
+  not-enough-items: "&cYou don't have enough items. Required: &e{amount}&c."
+  invalid-amount: "&cInvalid amount specified."
+  shop-not-found: "&cShop &e{shop} &cnot found."
+  category-not-found: "&cCategory &e{category} &cnot found."
+
+debug: false

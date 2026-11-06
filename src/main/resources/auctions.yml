@@ -1,0 +1,5 @@
+# PremiumShop Auctions Data
+# This file is managed automatically by the plugin.
+# Manual edits may cause data corruption.
+# Structure: listings -> uuid -> {item, seller, startBid, buyoutPrice, currentBid, currentBidder, endTime, status}
+listings: {}
