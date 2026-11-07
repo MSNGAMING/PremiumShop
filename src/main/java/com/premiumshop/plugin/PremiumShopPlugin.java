@@ -15,8 +15,12 @@ import com.premiumshop.plugin.listener.PlayerJoinListener;
 import com.premiumshop.plugin.listener.ShopListener;
 import com.premiumshop.plugin.placeholder.PlaceholderManager;
 import com.premiumshop.plugin.shop.ShopManager;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
 
 /**
  * Main entry point for the PremiumShop plugin.
@@ -123,10 +127,8 @@ public final class PremiumShopPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GuiClickListener(this),  this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
-        // ── 11. Register commands ────────────────────────────────────────
-        registerCommand("shop",       new ShopCommand(this));
-        registerCommand("auction",    new AuctionCommand(this));
-        registerCommand("shopadmin",  new ShopAdminCommand(this));
+        // ── 11. Register commands (Native Paper Brigadier Lifecycle) ─────
+        registerCommands();
 
         // ── 12. PlaceholderAPI ───────────────────────────────────────────
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -302,16 +304,30 @@ public final class PremiumShopPlugin extends JavaPlugin {
     // -----------------------------------------------------------------------
 
     /**
-     * Registers a command executor by name, guarding against a missing
-     * {@code plugin.yml} entry with a warning rather than an NPE.
-     *
-     * @param name     the command name as declared in {@code plugin.yml}
-     * @param executor the executor to register
+     * Registers commands using Paper's native Brigadier Lifecycle API (LifecycleEvents.COMMANDS),
+     * with graceful Bukkit fallback if running under an alternate environment.
      */
-    private void registerCommand(String name, org.bukkit.command.CommandExecutor executor) {
+    private void registerCommands() {
+        try {
+            this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+                final Commands commands = event.registrar();
+                commands.register("shop", "Opens the main shop interface", List.of("ps", "store"), new ShopCommand(this));
+                commands.register("auction", "Opens the auction house interface", List.of("ah", "auctionhouse"), new AuctionCommand(this));
+                commands.register("shopadmin", "Administrative commands for PremiumShop", List.of("psadmin", "sa"), new ShopAdminCommand(this));
+            });
+            getLogger().info("Successfully registered commands via Paper Lifecycle API.");
+        } catch (Throwable t) {
+            getLogger().warning("Could not register commands via Paper Lifecycle API (" + t.getMessage() + "), falling back to Bukkit command registration.");
+            registerBukkitCommand("shop", new ShopCommand(this));
+            registerBukkitCommand("auction", new AuctionCommand(this));
+            registerBukkitCommand("shopadmin", new ShopAdminCommand(this));
+        }
+    }
+
+    private void registerBukkitCommand(String name, org.bukkit.command.CommandExecutor executor) {
         var cmd = getCommand(name);
         if (cmd == null) {
-            getLogger().warning("Command '" + name + "' is not declared in plugin.yml – skipping registration.");
+            getLogger().warning("Command '" + name + "' is not declared in plugin.yml – skipping Bukkit registration.");
             return;
         }
         cmd.setExecutor(executor);

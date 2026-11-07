@@ -1,0 +1,55 @@
+name: PremiumShop
+version: '${project.version}'
+main: com.premiumshop.plugin.PremiumShopPlugin
+bootstrapper: com.premiumshop.plugin.PremiumShopBootstrap
+api-version: '1.21'
+description: Enterprise-grade virtual shop and auction house for Paper 1.21+
+authors:
+  - MSNGAMING
+  - PremiumDev
+website: https://github.com/MSNGAMING/PremiumShop
+
+dependencies:
+  server:
+    Vault:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true
+
+permissions:
+  premiumshop.shop:
+    description: Allows the player to open and use the shop
+    default: true
+  premiumshop.auction:
+    description: Allows the player to access the auction house
+    default: true
+  premiumshop.auction.list:
+    description: Allows the player to list items on the auction house
+    default: true
+  premiumshop.auction.bid:
+    description: Allows the player to place bids on auction house listings
+    default: true
+  premiumshop.admin:
+    description: Grants access to all PremiumShop administrative commands
+    default: op
+    children:
+      premiumshop.admin.editor: true
+      premiumshop.admin.reload: true
+      premiumshop.admin.setprice: true
+      premiumshop.bypass.limit: true
+  premiumshop.admin.editor:
+    description: Allows the player to use the in-game shop editor
+    default: op
+  premiumshop.admin.reload:
+    description: Allows the player to reload the plugin configuration
+    default: op
+  premiumshop.admin.setprice:
+    description: Allows the player to set prices for shop items
+    default: op
+  premiumshop.bypass.limit:
+    description: Allows the player to bypass shop and auction limits
+    default: op

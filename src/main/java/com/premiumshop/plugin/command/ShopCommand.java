@@ -3,6 +3,8 @@ package com.premiumshop.plugin.command;
 import com.premiumshop.plugin.PremiumShopPlugin;
 import com.premiumshop.plugin.gui.GuiManager;
 import com.premiumshop.plugin.util.ColorUtil;
+import io.papermc.paper.command.brigadier.BasicCommand;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,6 +14,8 @@ import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,7 +31,7 @@ import java.util.List;
  *
  * <p>All usages require the {@code premiumshop.shop} permission.
  */
-public class ShopCommand implements CommandExecutor, TabCompleter {
+public class ShopCommand implements CommandExecutor, TabCompleter, BasicCommand {
 
     private static final List<String> TOP_COMPLETIONS = Arrays.asList("open", "search");
 
@@ -157,6 +161,31 @@ public class ShopCommand implements CommandExecutor, TabCompleter {
         }
 
         return completions;
+    }
+
+    // -------------------------------------------------------------------------
+    // Paper BasicCommand Implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void execute(final CommandSourceStack stack, final String[] args) {
+        onCommand(stack.getSender(), null, "shop", args);
+    }
+
+    @Override
+    public Collection<String> suggest(final CommandSourceStack stack, final String[] args) {
+        final List<String> completions = onTabComplete(stack.getSender(), null, "shop", args);
+        return completions != null ? completions : Collections.emptyList();
+    }
+
+    @Override
+    public boolean canUse(final CommandSender sender) {
+        return sender.hasPermission("premiumshop.shop");
+    }
+
+    @Override
+    public String permission() {
+        return "premiumshop.shop";
     }
 
     // -------------------------------------------------------------------------
