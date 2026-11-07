@@ -61,11 +61,13 @@ public class ShopManager {
         int mainShopItemCount = mainShop != null
                 ? mainShop.getCategories().stream().mapToInt(c -> c.getItems().size()).sum()
                 : 0;
+        int catalogVersion = config.getInt("catalog-version", 0);
 
-        if (mainShop == null || mainShopItemCount < 100) {
-            plugin.getLogger().info("Generating full survival item catalog for PremiumShop...");
+        if (mainShop == null || mainShopItemCount < 100 || catalogVersion < 2) {
+            plugin.getLogger().info("Generating full survival item catalog with balanced rarity pricing...");
             Shop defaultShop = ShopCatalogGenerator.generateDefaultShop();
             shops.put(defaultShop.getId().toLowerCase(Locale.ROOT), defaultShop);
+            config.set("catalog-version", 2);
             saveShops();
             int genItems = defaultShop.getCategories().stream().mapToInt(c -> c.getItems().size()).sum();
             plugin.getLogger().info("Successfully generated default shop with " + genItems
@@ -91,6 +93,7 @@ public class ShopManager {
         FileConfiguration config = plugin.getConfigManager().getShopsConfig();
         if (config == null) return;
 
+        config.set("catalog-version", 2);
         ConfigurationSection shopsSection = config.createSection("shops");
         for (Shop shop : shops.values()) {
             ConfigurationSection sec = shopsSection.createSection(shop.getId());
@@ -268,6 +271,133 @@ public class ShopManager {
     }
 
     /**
+     * Checks if a player's inventory item matches a shop item for selling.
+     */
+    public static boolean isMatchingItem(ItemStack slotItem, ShopItem shopItem) {
+        if (slotItem == null || slotItem.getType().isAir() || shopItem == null) {
+            return false;
+        }
+
+        ItemStack match = shopItem.getDisplayItem();
+        if (slotItem.getType() != match.getType()) {
+            return false;
+        }
+
+        // Prevent selling damaged armor or tools
+        if (slotItem.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable damageable && damageable.hasDamage()) {
+            return false;
+        }
+
+        // If the shop item requires specific custom model data, require a match
+        if (match.hasItemMeta() && match.getItemMeta().hasCustomModelData()) {
+            if (!slotItem.hasItemMeta() || !slotItem.getItemMeta().hasCustomModelData()
+                    || slotItem.getItemMeta().getCustomModelData() != match.getItemMeta().getCustomModelData()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Counts how many units of the given shop item the player holds in their inventory.
+     */
+    public int countItemsInInventory(Player player, ShopItem shopItem) {
+        if (player == null || shopItem == null) return 0;
+        int count = 0;
+        for (ItemStack slotItem : player.getInventory().getContents()) {
+            if (isMatchingItem(slotItem, shopItem)) {
+                count += slotItem.getAmount();
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Removes up to the given amount of matching items from the player's inventory.
+     *
+     * @return the actual number of items removed
+     */
+    public int removeItemsFromInventory(Player player, ShopItem shopItem, int amount) {
+        if (player == null || shopItem == null || amount <= 0) return 0;
+        int remaining = amount;
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack slotItem = contents[i];
+            if (isMatchingItem(slotItem, shopItem)) {
+                int stackAmount = slotItem.getAmount();
+                if (stackAmount <= remaining) {
+                    remaining -= stackAmount;
+                    player.getInventory().setItem(i, null);
+                } else {
+                    slotItem.setAmount(stackAmount - remaining);
+                    player.getInventory().setItem(i, slotItem);
+                    remaining = 0;
+                }
+                if (remaining <= 0) break;
+            }
+        }
+        player.updateInventory();
+        return amount - remaining;
+    }
+
+    /**
+     * Summary record used for the Sell All re-confirmation GUI.
+     */
+    public record SellAllSummary(int totalItemCount, double totalPayout, Map<ShopItem, Integer> itemCounts) {}
+
+    /**
+     * Calculates the summary of all sellable items in the player's entire inventory.
+     */
+    public SellAllSummary calculateSellAllSummary(Player player, String shopId) {
+        if (player == null) return new SellAllSummary(0, 0.0, Collections.emptyMap());
+        Shop shop = getShop(shopId);
+        if (shop == null) shop = getDefaultShop();
+        String finalShopId = shop != null ? shop.getId() : "main";
+
+        int totalCount = 0;
+        double totalPayout = 0.0;
+        Map<ShopItem, Integer> counts = new LinkedHashMap<>();
+
+        if (shop != null) {
+            for (ShopCategory category : shop.getCategories()) {
+                for (ShopItem shopItem : category.getItems()) {
+                    if (!shopItem.isSellable()) continue;
+                    int inInv = countItemsInInventory(player, shopItem);
+                    if (inInv > 0) {
+                        counts.put(shopItem, inInv);
+                        totalCount += inInv;
+                        double unitPrice = getDynamicSellPrice(finalShopId, shopItem);
+                        totalPayout += unitPrice * inInv;
+                    }
+                }
+            }
+        }
+        return new SellAllSummary(totalCount, totalPayout, counts);
+    }
+
+    /**
+     * Sells all sellable items in the player's entire inventory across all categories.
+     *
+     * @param player the player selling
+     * @param shopId the shop identifier
+     * @return the total currency earned
+     */
+    public double sellAllEntireInventory(Player player, String shopId) {
+        if (player == null) return 0.0;
+        Shop shop = getShop(shopId);
+        if (shop == null) shop = getDefaultShop();
+        if (shop == null) return 0.0;
+        String finalShopId = shop.getId();
+
+        double totalEarned = 0.0;
+        for (ShopCategory category : shop.getCategories()) {
+            totalEarned += sellAll(player, finalShopId, category);
+        }
+        return totalEarned;
+    }
+
+    /**
      * Sells all matching items in the player's inventory for the given category.
      *
      * @param player   the player selling
@@ -284,34 +414,10 @@ public class ShopManager {
         for (ShopItem shopItem : category.getItems()) {
             if (!shopItem.isSellable()) continue;
 
-            ItemStack match = shopItem.getDisplayItem();
-            int countInInventory = 0;
-            ItemStack[] contents = player.getInventory().getContents();
-            for (ItemStack slotItem : contents) {
-                if (slotItem != null && slotItem.isSimilar(match)) {
-                    countInInventory += slotItem.getAmount();
-                }
-            }
-
+            int countInInventory = countItemsInInventory(player, shopItem);
             if (countInInventory <= 0) continue;
 
-            // Remove items
-            int remaining = countInInventory;
-            for (int i = 0; i < contents.length; i++) {
-                ItemStack slotItem = contents[i];
-                if (slotItem != null && slotItem.isSimilar(match)) {
-                    int stackAmount = slotItem.getAmount();
-                    if (stackAmount <= remaining) {
-                        remaining -= stackAmount;
-                        player.getInventory().setItem(i, null);
-                    } else {
-                        slotItem.setAmount(stackAmount - remaining);
-                        player.getInventory().setItem(i, slotItem);
-                        remaining = 0;
-                    }
-                    if (remaining <= 0) break;
-                }
-            }
+            removeItemsFromInventory(player, shopItem, countInInventory);
 
             double unitPrice = getDynamicSellPrice(finalShopId, shopItem);
             double totalItemPrice = unitPrice * countInInventory;
@@ -349,14 +455,7 @@ public class ShopManager {
             return false;
         }
 
-        ItemStack match = item.getDisplayItem();
-        int countInInventory = 0;
-        for (ItemStack slotItem : player.getInventory().getContents()) {
-            if (slotItem != null && slotItem.isSimilar(match)) {
-                countInInventory += slotItem.getAmount();
-            }
-        }
-
+        int countInInventory = countItemsInInventory(player, item);
         if (countInInventory < amount) {
             String msg = plugin.getConfigManager().getString("messages.not-enough-items", "&cYou don't have enough items.");
             player.sendMessage(ColorUtil.format(msg, "amount", String.valueOf(amount)));
@@ -369,21 +468,8 @@ public class ShopManager {
 
         double totalPrice = unitPrice * amount;
 
-        // Remove items from player inventory
-        int remainingToRemove = amount;
-        for (ItemStack slotItem : player.getInventory().getContents()) {
-            if (slotItem != null && slotItem.isSimilar(match)) {
-                int stackAmount = slotItem.getAmount();
-                if (stackAmount <= remainingToRemove) {
-                    remainingToRemove -= stackAmount;
-                    slotItem.setAmount(0);
-                } else {
-                    slotItem.setAmount(stackAmount - remainingToRemove);
-                    remainingToRemove = 0;
-                }
-                if (remainingToRemove <= 0) break;
-            }
-        }
+        // Remove items from player inventory safely
+        removeItemsFromInventory(player, item, amount);
 
         // Add funds
         plugin.getEconomyManager().deposit(player, totalPrice);

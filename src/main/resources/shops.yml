@@ -6,6 +6,8 @@
 # Stocks operate as limited background reserves (tracked dynamically behind the scenes),
 # and remain completely invisible to players in GUIs.
 
+catalog-version: 2
+
 shops:
   main:
     display-name: "&6&lPremium Shop"

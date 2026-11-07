@@ -140,7 +140,7 @@ public final class ShopItem {
         if (displayItem != null && displayItem.hasItemMeta() && displayItem.getItemMeta().hasDisplayName()) {
             return displayItem.getItemMeta().getDisplayName();
         }
-        return displayItem != null ? displayItem.getType().name().replace('_', ' ') : id;
+        return displayItem != null ? ShopCatalogGenerator.formatDisplayName(displayItem.getType()) : id;
     }
 
     /** @return the maximum stock level, or {@code -1} for unlimited */

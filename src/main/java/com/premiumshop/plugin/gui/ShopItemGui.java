@@ -83,32 +83,8 @@ public class ShopItemGui extends PaginatedGui {
         for (ShopItem shopItem : items) {
             ItemStack display = buildDisplayItem(shopItem);
             GuiAction action = event -> {
-                boolean rightClick = event.isRightClick();
-                if (rightClick) {
-                    // Sell flow
-                    if (!shopItem.isSellable()) {
-                        viewer.sendMessage(colorizeComponent(
-                                "&cThis item cannot be sold here."));
-                        return;
-                    }
-                    double sellPrice = plugin.getShopManager()
-                            .getDynamicSellPrice(shop.getId(), shopItem);
-                    ConfirmGui confirmGui = new ConfirmGui(
-                            plugin, viewer, shopItem, shop.getId(), 1, false, sellPrice);
-                    confirmGui.open();
-                } else {
-                    // Buy flow
-                    if (!shopItem.isBuyable()) {
-                        viewer.sendMessage(colorizeComponent(
-                                "&cThis item is not for sale."));
-                        return;
-                    }
-                    double buyPrice = plugin.getShopManager()
-                            .getDynamicBuyPrice(shop.getId(), shopItem);
-                    ConfirmGui confirmGui = new ConfirmGui(
-                            plugin, viewer, shopItem, shop.getId(), 1, true, buyPrice);
-                    confirmGui.open();
-                }
+                ConfirmGui confirmGui = new ConfirmGui(plugin, viewer, shop, category, shopItem);
+                confirmGui.open();
             };
             entries.add(new AbstractMap.SimpleImmutableEntry<>(display, action));
         }
@@ -126,14 +102,14 @@ public class ShopItemGui extends PaginatedGui {
         super.populateInventory();
 
         // "Sell All" button — slot 48 (between nav buttons)
-        if (plugin.getConfigManager().isSellAllEnabled() && hasSellableItems()) {
+        if (plugin.getConfigManager().isSellAllEnabled()) {
             ItemStack sellAll = createItem(
                     Material.HOPPER,
-                    "&c&lSell All",
-                    "&7Sell all matching items in",
-                    "&7your inventory at current prices.",
+                    "&6&lSell All (Inventory)",
+                    "&7Sell all matching items in your",
+                    "&7entire inventory at current prices.",
                     "&8─────────────────",
-                    "&eClick to sell all!"
+                    "&eClick to open Sell All confirm!"
             );
             setItem(48, sellAll, event -> handleSellAll());
         }
@@ -221,8 +197,7 @@ public class ShopItemGui extends PaginatedGui {
         lore.add("&7Trend: " + priceTrendIndicator(shopId, item));
 
         lore.add("&8─────────────────");
-        lore.add("&eLeft-click &7to &abuy");
-        lore.add("&eRight-click &7to &csell");
+        lore.add("&eClick &7to &aBuy &7or &6Sell");
 
         return lore;
     }
@@ -281,27 +256,11 @@ public class ShopItemGui extends PaginatedGui {
     }
 
     /**
-     * Sells all items in the viewer's inventory that are present in this
-     * category at their current dynamic sell price, depositing the total
-     * into the player's economy balance.
+     * Opens the Sell All re-confirmation dialog to safely sell all matching
+     * items from the player's entire inventory.
      */
     private void handleSellAll() {
-        if (!hasSellableItems()) {
-            viewer.sendMessage(colorizeComponent(
-                    "&cThere are no sellable items in this category."));
-            return;
-        }
-        double totalEarned = plugin.getShopManager()
-                .sellAll(viewer, shop.getId(), category);
-        if (totalEarned <= 0) {
-            viewer.sendMessage(colorizeComponent(
-                    "&cYou have no sellable items from this category in your inventory."));
-        } else {
-            viewer.sendMessage(colorizeComponent(
-                    "&aSold all items for &e$" + formatPrice(totalEarned) + "&a!"));
-        }
-        // Refresh the GUI to reflect updated stock
-        refresh();
+        new SellAllConfirmGui(plugin, viewer, shop, category).open();
     }
 
     /**
