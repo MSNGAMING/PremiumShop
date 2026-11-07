@@ -83,15 +83,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- SLF4J Simple - for HikariCP logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.9</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- SQLite JDBC - shaded -->
+        <!-- SQLite JDBC - shaded (do NOT relocate: native JNI bindings require org.sqlite package) -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
@@ -138,26 +130,14 @@
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <minimizeJar>false</minimizeJar>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
                             <relocations>
-                                <!-- HikariCP relocation -->
+                                <!-- Relocate HikariCP to avoid version conflicts with other plugins -->
                                 <relocation>
                                     <pattern>com.zaxxer.hikari</pattern>
                                     <shadedPattern>com.premiumshop.libs.hikari</shadedPattern>
-                                </relocation>
-                                <!-- SQLite JDBC relocation -->
-                                <relocation>
-                                    <pattern>org.sqlite</pattern>
-                                    <shadedPattern>com.premiumshop.libs.sqlite</shadedPattern>
-                                </relocation>
-                                <!-- MySQL Connector relocation -->
-                                <relocation>
-                                    <pattern>com.mysql</pattern>
-                                    <shadedPattern>com.premiumshop.libs.mysql</shadedPattern>
-                                </relocation>
-                                <!-- SLF4J relocation -->
-                                <relocation>
-                                    <pattern>org.slf4j</pattern>
-                                    <shadedPattern>com.premiumshop.libs.slf4j</shadedPattern>
                                 </relocation>
                             </relocations>
                             <artifactSet>
@@ -165,8 +145,6 @@
                                     <include>com.zaxxer:HikariCP</include>
                                     <include>org.xerial:sqlite-jdbc</include>
                                     <include>com.mysql:mysql-connector-j</include>
-                                    <include>org.slf4j:slf4j-api</include>
-                                    <include>org.slf4j:slf4j-simple</include>
                                 </includes>
                             </artifactSet>
                             <filters>

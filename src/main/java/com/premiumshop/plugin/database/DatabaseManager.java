@@ -158,8 +158,14 @@ public final class DatabaseManager {
         final File dbFile = new File(plugin.getDataFolder(), "premiumshop.db");
         plugin.getDataFolder().mkdirs();
 
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (final ClassNotFoundException ex) {
+            plugin.getLogger().warning("Failed to explicitly load org.sqlite.JDBC: " + ex.getMessage());
+        }
+
         final HikariConfig config = new HikariConfig();
-        config.setDriverClassName("com.premiumshop.libs.sqlite.JDBC");
+        config.setDriverClassName("org.sqlite.JDBC");
         config.setJdbcUrl("jdbc:sqlite:" + dbFile.getAbsolutePath());
         config.setMaximumPoolSize(1);
         config.setMinimumIdle(1);
@@ -200,6 +206,7 @@ public final class DatabaseManager {
         final long   maxLifetime  = plugin.getConfigManager().getLong("database.mysql.pool.max-lifetime", 1_800_000L);
 
         final HikariConfig config = new HikariConfig();
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + dbName
                 + "?useSSL=false&autoReconnect=true&characterEncoding=utf8mb4"
                 + "&useUnicode=true&serverTimezone=UTC");
