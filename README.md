@@ -49,12 +49,3 @@
 
 ---
 
-## 🛠 Building from Source
-
-Requires Java 21+ and Maven:
-
-```bash
-mvn clean package
-```
-
-The shaded production JAR will be generated in `target/PremiumShop-1.0.0.jar`.
