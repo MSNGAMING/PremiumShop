@@ -74,7 +74,7 @@ public class AuctionListingGui extends AbstractGui {
             // Seller cancellation option (only if no bids placed)
             if (!listing.hasBids()) {
                 setItem(11, createItem(
-                        Material.BARRIER,
+                        Material.RED_CONCRETE,
                         "&c&lCancel Listing",
                         "&7Click to cancel this auction and reclaim your item."
                 ), event -> {
@@ -87,7 +87,7 @@ public class AuctionListingGui extends AbstractGui {
                 });
             } else {
                 setItem(11, createItem(
-                        Material.BARRIER,
+                        Material.GRAY_DYE,
                         "&c&lCannot Cancel",
                         "&7This listing already has bids and cannot be cancelled."
                 ));

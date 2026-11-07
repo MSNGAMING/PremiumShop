@@ -140,7 +140,7 @@ public class ShopItemGui extends PaginatedGui {
 
         // Back button — slot 45's left neighbour / slot 46
         ItemStack back = createItem(
-                Material.BARRIER,
+                Material.ARROW,
                 "&c&l← Back",
                 "&7Return to categories"
         );
@@ -216,9 +216,6 @@ public class ShopItemGui extends PaginatedGui {
         }
 
         lore.add("&8─────────────────");
-
-        // Stock bar
-        lore.add("&7Stock: " + stockBar(item));
 
         // Price trend
         lore.add("&7Trend: " + priceTrendIndicator(shopId, item));

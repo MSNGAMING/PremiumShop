@@ -79,36 +79,15 @@ public final class ConfigManager {
             plugin.saveResource("auctions.yml", false);
         }
 
-        // Reload main config from disk first (synchronous – already on main thread)
+        // Reload main config from disk
         plugin.reloadConfig();
 
-        // Load shops.yml and auctions.yml asynchronously, then assign on main thread
-        CompletableFuture
-            .supplyAsync(() -> {
-                FileConfiguration shops    = YamlConfiguration.loadConfiguration(shopsFile);
-                FileConfiguration auctions = YamlConfiguration.loadConfiguration(auctionsFile);
-                return new FileConfiguration[]{shops, auctions};
-            })
-            .thenAccept(configs -> Bukkit.getScheduler().runTask(plugin, () -> {
-                shopsConfig    = configs[0];
-                auctionsConfig = configs[1];
-                plugin.getLogger().info("All configuration files loaded successfully.");
-            }))
-            .exceptionally(ex -> {
-                plugin.getLogger().log(Level.SEVERE, "Failed to load one or more config files asynchronously.", ex);
-                // Fall back to synchronous load on the calling thread
-                shopsConfig    = YamlConfiguration.loadConfiguration(shopsFile);
-                auctionsConfig = YamlConfiguration.loadConfiguration(auctionsFile);
-                return null;
-            });
-
-        // Provide synchronous fallback immediately so callers on onEnable()
-        // that run right after loadAll() always have non-null configs.
-        if (shopsConfig == null) {
+        try {
             shopsConfig = YamlConfiguration.loadConfiguration(shopsFile);
-        }
-        if (auctionsConfig == null) {
             auctionsConfig = YamlConfiguration.loadConfiguration(auctionsFile);
+            plugin.getLogger().info("All configuration files loaded successfully.");
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to load config files.", ex);
         }
     }
 

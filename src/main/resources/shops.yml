@@ -1,485 +1,73 @@
 # PremiumShop - Shop Definitions
 # --------------------------------
-# Structure:
-#   shops:
-#     <shop-id>:
-#       display-name: <string>
-#       description: <string>
-#       icon: <material>
-#       categories:
-#         <category-id>:
-#           display-name: <string>
-#           description: <string>
-#           icon: <material>
-#           slot: <int>  (slot in the main shop category selector GUI)
-#           gui-layout:
-#             title: <string>
-#             rows: <int>
-#             slots: [<int>, ...]  # ordered list of slots where shop items appear
-#           items:
-#             <item-id>:
-#               material: <material>
-#               display-name: <string>
-#               lore: [<string>, ...]
-#               base-buy-price: <double>
-#               base-sell-price: <double>
-#               max-stock: <int>
-#               current-stock: <int>
+# PremiumShop auto-generates all survival-obtainable items across these 10 categories
+# on first launch, or when /shopadmin generatecatalog is executed.
+#
+# Stocks operate as limited background reserves (tracked dynamically behind the scenes),
+# and remain completely invisible to players in GUIs.
 
 shops:
   main:
     display-name: "&6&lPremium Shop"
-    description: "The main server shop with a wide variety of items."
+    description: "The main server survival shop."
     icon: CHEST
     categories:
+      building_blocks:
+        display-name: "&a&lBuilding Blocks"
+        icon: BRICKS
+        slot: 11
+        items: {}
 
-      # -----------------------------------------------------------------------
-      # TOOLS
-      # -----------------------------------------------------------------------
-      tools:
-        display-name: "&e&lTools"
-        description: "Axes, pickaxes, shovels, and more."
-        icon: IRON_PICKAXE
-        slot: 10
-        gui-layout:
-          title: "&8Shop &7» &eTools"
-          rows: 6
-          # 54-slot inventory (rows 0-5, cols 0-8)
-          # Row 0 (slots 0-8):   top decorative border
-          # Row 1 (slots 9-17):  items start at slot 10
-          # Row 2 (slots 18-26): items continue
-          # Row 3 (slots 27-35): items continue
-          # Row 4 (slots 36-44): items continue
-          # Row 5 (slots 45-53): bottom bar (prev/close/next at 45,49,53)
-          slots:
-            - 10
-            - 11
-            - 12
-            - 13
-            - 14
-            - 15
-            - 16
-            - 19
-            - 20
-            - 21
-            - 22
-            - 23
-            - 24
-            - 25
-            - 28
-            - 29
-            - 30
-            - 31
-            - 32
-            - 33
-            - 34
-            - 37
-            - 38
-            - 39
-            - 40
-            - 41
-            - 42
-            - 43
-          nav:
-            prev-page-slot: 45
-            close-slot: 49
-            next-page-slot: 53
-        items:
-          diamond_pickaxe:
-            material: DIAMOND_PICKAXE
-            display-name: "&b&lDiamond Pickaxe"
-            lore:
-              - "&7A pickaxe fit for a king."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 850.0
-            base-sell-price: 300.0
-            max-stock: 64
-            current-stock: 64
-          iron_pickaxe:
-            material: IRON_PICKAXE
-            display-name: "&7&lIron Pickaxe"
-            lore:
-              - "&7A reliable iron pickaxe."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 150.0
-            base-sell-price: 50.0
-            max-stock: 128
-            current-stock: 128
-          diamond_axe:
-            material: DIAMOND_AXE
-            display-name: "&b&lDiamond Axe"
-            lore:
-              - "&7A diamond-tipped axe."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 820.0
-            base-sell-price: 290.0
-            max-stock: 64
-            current-stock: 64
-          iron_axe:
-            material: IRON_AXE
-            display-name: "&7&lIron Axe"
-            lore:
-              - "&7A sturdy iron axe."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 130.0
-            base-sell-price: 45.0
-            max-stock: 128
-            current-stock: 128
-          diamond_shovel:
-            material: DIAMOND_SHOVEL
-            display-name: "&b&lDiamond Shovel"
-            lore:
-              - "&7A shovel that never dulls."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 780.0
-            base-sell-price: 270.0
-            max-stock: 64
-            current-stock: 64
-
-      # -----------------------------------------------------------------------
-      # BLOCKS
-      # -----------------------------------------------------------------------
-      blocks:
-        display-name: "&a&lBlocks"
-        description: "Building blocks for your constructions."
-        icon: GRASS_BLOCK
+      minerals_ores:
+        display-name: "&b&lMinerals & Ores"
+        icon: DIAMOND
         slot: 12
-        gui-layout:
-          title: "&8Shop &7» &aBlocks"
-          rows: 6
-          slots:
-            - 10
-            - 11
-            - 12
-            - 13
-            - 14
-            - 15
-            - 16
-            - 19
-            - 20
-            - 21
-            - 22
-            - 23
-            - 24
-            - 25
-            - 28
-            - 29
-            - 30
-            - 31
-            - 32
-            - 33
-            - 34
-            - 37
-            - 38
-            - 39
-            - 40
-            - 41
-            - 42
-            - 43
-          nav:
-            prev-page-slot: 45
-            close-slot: 49
-            next-page-slot: 53
-        items:
-          stone:
-            material: STONE
-            display-name: "&7&lStone"
-            lore:
-              - "&7Classic building stone."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 2.0
-            base-sell-price: 0.5
-            max-stock: 9999
-            current-stock: 9999
-          cobblestone:
-            material: COBBLESTONE
-            display-name: "&8&lCobblestone"
-            lore:
-              - "&7The workhorse of building."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 1.5
-            base-sell-price: 0.3
-            max-stock: 9999
-            current-stock: 9999
-          oak_log:
-            material: OAK_LOG
-            display-name: "&6&lOak Log"
-            lore:
-              - "&7A solid oak log for building."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 5.0
-            base-sell-price: 2.0
-            max-stock: 4096
-            current-stock: 4096
-          oak_planks:
-            material: OAK_PLANKS
-            display-name: "&6Oak Planks"
-            lore:
-              - "&7Processed oak planks."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 2.0
-            base-sell-price: 0.8
-            max-stock: 9999
-            current-stock: 9999
-          glass:
-            material: GLASS
-            display-name: "&f&lGlass"
-            lore:
-              - "&7Crystal-clear glass blocks."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 4.0
-            base-sell-price: 1.0
-            max-stock: 4096
-            current-stock: 4096
+        items: {}
 
-      # -----------------------------------------------------------------------
-      # FOOD
-      # -----------------------------------------------------------------------
-      food:
-        display-name: "&c&lFood"
-        description: "Keep your hunger bar full."
-        icon: COOKED_BEEF
-        slot: 14
-        gui-layout:
-          title: "&8Shop &7» &cFood"
-          rows: 6
-          slots:
-            - 10
-            - 11
-            - 12
-            - 13
-            - 14
-            - 15
-            - 16
-            - 19
-            - 20
-            - 21
-            - 22
-            - 23
-            - 24
-            - 25
-            - 28
-            - 29
-            - 30
-            - 31
-            - 32
-            - 33
-            - 34
-            - 37
-            - 38
-            - 39
-            - 40
-            - 41
-            - 42
-            - 43
-          nav:
-            prev-page-slot: 45
-            close-slot: 49
-            next-page-slot: 53
-        items:
-          cooked_beef:
-            material: COOKED_BEEF
-            display-name: "&c&lSteak"
-            lore:
-              - "&7Restores 4 hunger points."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 10.0
-            base-sell-price: 4.0
-            max-stock: 2048
-            current-stock: 2048
-          bread:
-            material: BREAD
-            display-name: "&6Bread"
-            lore:
-              - "&7A simple loaf of bread."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 5.0
-            base-sell-price: 2.0
-            max-stock: 2048
-            current-stock: 2048
-          golden_apple:
-            material: GOLDEN_APPLE
-            display-name: "&6&lGolden Apple"
-            lore:
-              - "&7Provides absorption and regeneration."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 75.0
-            base-sell-price: 30.0
-            max-stock: 256
-            current-stock: 256
-          cooked_chicken:
-            material: COOKED_CHICKEN
-            display-name: "&eCooked Chicken"
-            lore:
-              - "&7Restores 3 hunger points."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 7.0
-            base-sell-price: 2.5
-            max-stock: 2048
-            current-stock: 2048
-          pumpkin_pie:
-            material: PUMPKIN_PIE
-            display-name: "&6Pumpkin Pie"
-            lore:
-              - "&7A tasty slice of pumpkin pie."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 8.0
-            base-sell-price: 3.0
-            max-stock: 2048
-            current-stock: 2048
+      farming_food:
+        display-name: "&e&lFarming & Food"
+        icon: GOLDEN_CARROT
+        slot: 13
+        items: {}
 
-      # -----------------------------------------------------------------------
-      # MISC
-      # -----------------------------------------------------------------------
-      misc:
-        display-name: "&d&lMisc"
-        description: "Miscellaneous items and resources."
+      mob_drops:
+        display-name: "&c&lMob Drops"
         icon: ENDER_PEARL
-        slot: 16
-        gui-layout:
-          title: "&8Shop &7» &dMisc"
-          rows: 6
-          slots:
-            - 10
-            - 11
-            - 12
-            - 13
-            - 14
-            - 15
-            - 16
-            - 19
-            - 20
-            - 21
-            - 22
-            - 23
-            - 24
-            - 25
-            - 28
-            - 29
-            - 30
-            - 31
-            - 32
-            - 33
-            - 34
-            - 37
-            - 38
-            - 39
-            - 40
-            - 41
-            - 42
-            - 43
-          nav:
-            prev-page-slot: 45
-            close-slot: 49
-            next-page-slot: 53
-        items:
-          ender_pearl:
-            material: ENDER_PEARL
-            display-name: "&5&lEnder Pearl"
-            lore:
-              - "&7Teleport to where it lands."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 50.0
-            base-sell-price: 20.0
-            max-stock: 512
-            current-stock: 512
-          blaze_rod:
-            material: BLAZE_ROD
-            display-name: "&6&lBlaze Rod"
-            lore:
-              - "&7Used in brewing and crafting."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 35.0
-            base-sell-price: 14.0
-            max-stock: 512
-            current-stock: 512
-          string:
-            material: STRING
-            display-name: "&fString"
-            lore:
-              - "&7Useful for bows and fishing rods."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 3.0
-            base-sell-price: 1.0
-            max-stock: 2048
-            current-stock: 2048
-          gunpowder:
-            material: GUNPOWDER
-            display-name: "&8Gunpowder"
-            lore:
-              - "&7For TNT and fireworks."
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 8.0
-            base-sell-price: 3.0
-            max-stock: 2048
-            current-stock: 2048
-          name_tag:
-            material: NAME_TAG
-            display-name: "&f&lName Tag"
-            lore:
-              - "&7Give your mob a name!"
-              - ""
-              - "&eBuy: &a${buy}"
-              - "&eSell: &c${sell}"
-              - "&eStock: &f{stock}/{max-stock}"
-            base-buy-price: 60.0
-            base-sell-price: 20.0
-            max-stock: 256
-            current-stock: 256
+        slot: 14
+        items: {}
+
+      tools_combat:
+        display-name: "&6&lTools & Combat"
+        icon: NETHERITE_SWORD
+        slot: 15
+        items: {}
+
+      redstone_tech:
+        display-name: "&4&lRedstone & Tech"
+        icon: REDSTONE
+        slot: 20
+        items: {}
+
+      brewing_alchemy:
+        display-name: "&d&lBrewing & Alchemy"
+        icon: BREWING_STAND
+        slot: 21
+        items: {}
+
+      dyes_decor:
+        display-name: "&5&lDyes & Decoration"
+        icon: PAINTING
+        slot: 22
+        items: {}
+
+      wood_flora:
+        display-name: "&2&lWood & Flora"
+        icon: OAK_SAPLING
+        slot: 23
+        items: {}
+
+      rare_valuables:
+        display-name: "&3&lRare & Valuables"
+        icon: NETHER_STAR
+        slot: 24
+        items: {}

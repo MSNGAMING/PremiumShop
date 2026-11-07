@@ -76,9 +76,7 @@ public class ConfirmGui extends AbstractGui {
                 "&7Type: " + (isBuying ? "&aBuy" : "&6Sell"),
                 "&7Amount: &e" + amount,
                 "&7Unit Price: &e" + plugin.getEconomyManager().formatAmount(unitPrice),
-                "&7Total Price: &e" + formattedTotal,
-                "",
-                "&7Stock Available: &f" + (shopItem.getMaxStock() > 0 ? shopItem.getCurrentStock() : "Unlimited")
+                "&7Total Price: &e" + formattedTotal
         ));
 
         // Confirm button at slot 11

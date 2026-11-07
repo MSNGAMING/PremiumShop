@@ -245,7 +245,7 @@ public abstract class AbstractGui implements InventoryHolder {
      * @return a new {@link ItemStack} with the given meta applied
      */
     public ItemStack createItem(Material material, String name, int amount, String... lore) {
-        if (material == null) material = Material.BARRIER;
+        if (material == null) material = Material.STONE;
         int clampedAmount = Math.max(1, Math.min(64, amount));
         ItemStack item = new ItemStack(material, clampedAmount);
         ItemMeta meta = item.getItemMeta();

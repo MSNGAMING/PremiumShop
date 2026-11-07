@@ -89,7 +89,7 @@ public class InGameEditorGui extends AbstractGui {
         });
 
         // Close/Exit button at slot 49
-        setItem(49, createItem(Material.BARRIER, "&c&lClose Editor"), event -> {
+        setItem(49, createItem(Material.ARROW, "&c&lClose Editor"), event -> {
             viewer.closeInventory();
         });
     }

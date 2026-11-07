@@ -38,7 +38,7 @@ import java.util.List;
 public class ShopAdminCommand implements CommandExecutor, TabCompleter {
 
     private static final List<String> SUB_COMMANDS = Arrays.asList(
-            "reload", "setprice", "setstock", "editor", "resetprices", "auctionban", "info");
+            "reload", "setprice", "setstock", "editor", "resetprices", "auctionban", "info", "generatecatalog");
 
     private final PremiumShopPlugin plugin;
     private final GuiManager guiManager;
@@ -98,9 +98,10 @@ public class ShopAdminCommand implements CommandExecutor, TabCompleter {
             case "setstock"    -> handleSetStock(sender, args, label);
             case "editor"      -> handleEditor(sender, args, label);
             case "resetprices" -> handleResetPrices(sender, args, label);
-            case "auctionban"  -> handleAuctionBan(sender, args, label);
-            case "info"        -> handleInfo(sender);
-            default            -> sendUsage(sender, label);
+            case "auctionban"      -> handleAuctionBan(sender, args, label);
+            case "info"            -> handleInfo(sender);
+            case "generatecatalog" -> handleGenerateCatalog(sender);
+            default                -> sendUsage(sender, label);
         }
 
         return true;
@@ -430,6 +431,21 @@ public class ShopAdminCommand implements CommandExecutor, TabCompleter {
     // Helpers
     // -------------------------------------------------------------------------
 
+    private void handleGenerateCatalog(final CommandSender sender) {
+        sender.sendMessage(ColorUtil.colorize("&7[ShopAdmin] Generating full survival item catalog..."));
+        try {
+            com.premiumshop.plugin.shop.Shop shop = com.premiumshop.plugin.shop.ShopCatalogGenerator.generateDefaultShop();
+            shopManager.registerShop(shop);
+            shopManager.saveShops();
+            int itemCount = shop.getCategories().stream().mapToInt(c -> c.getItems().size()).sum();
+            sender.sendMessage(ColorUtil.colorize("&a[ShopAdmin] Successfully generated " + itemCount
+                    + " survival items across " + shop.getCategories().size() + " categories!"));
+        } catch (final Exception ex) {
+            sender.sendMessage(ColorUtil.colorize("&c[ShopAdmin] Generation failed: " + ex.getMessage()));
+            plugin.getLogger().severe("[ShopAdmin] Generate catalog error: " + ex.getMessage());
+        }
+    }
+
     /**
      * Sends the full command usage to the given sender.
      *
@@ -439,6 +455,7 @@ public class ShopAdminCommand implements CommandExecutor, TabCompleter {
     private void sendUsage(final CommandSender sender, final String label) {
         sender.sendMessage(ColorUtil.colorize("&6&l[ShopAdmin] &eCommands:"));
         sender.sendMessage(ColorUtil.colorize("  &b/" + label + " reload"));
+        sender.sendMessage(ColorUtil.colorize("  &b/" + label + " generatecatalog"));
         sender.sendMessage(ColorUtil.colorize("  &b/" + label + " setprice <shop> <cat> <item> <buy|sell> <price>"));
         sender.sendMessage(ColorUtil.colorize("  &b/" + label + " setstock <shop> <cat> <item> <amount>"));
         sender.sendMessage(ColorUtil.colorize("  &b/" + label + " editor <shop> <cat>"));

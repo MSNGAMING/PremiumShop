@@ -56,7 +56,32 @@ public class ShopManager {
                 }
             }
         }
+
+        Shop mainShop = shops.get("main");
+        int mainShopItemCount = mainShop != null
+                ? mainShop.getCategories().stream().mapToInt(c -> c.getItems().size()).sum()
+                : 0;
+
+        if (mainShop == null || mainShopItemCount < 100) {
+            plugin.getLogger().info("Generating full survival item catalog for PremiumShop...");
+            Shop defaultShop = ShopCatalogGenerator.generateDefaultShop();
+            shops.put(defaultShop.getId().toLowerCase(Locale.ROOT), defaultShop);
+            saveShops();
+            int genItems = defaultShop.getCategories().stream().mapToInt(c -> c.getItems().size()).sum();
+            plugin.getLogger().info("Successfully generated default shop with " + genItems
+                    + " survival items across " + defaultShop.getCategories().size() + " categories!");
+        }
+
         plugin.getLogger().info("Successfully loaded " + shops.size() + " shop(s).");
+    }
+
+    /**
+     * Registers a shop in memory.
+     */
+    public void registerShop(Shop shop) {
+        if (shop != null) {
+            shops.put(shop.getId().toLowerCase(Locale.ROOT), shop);
+        }
     }
 
     /**

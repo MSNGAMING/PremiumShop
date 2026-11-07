@@ -68,8 +68,8 @@ public class ShopCategoryGui extends AbstractGui {
 
         List<ShopCategory> categories = shop.getCategories();
         if (categories == null || categories.isEmpty()) {
-            setItem(26, createItem(
-                    Material.BARRIER,
+            setItem(22, createItem(
+                    Material.CHEST,
                     "&c&lNo Categories",
                     "&7This shop has no categories configured."
             ));
@@ -145,7 +145,7 @@ public class ShopCategoryGui extends AbstractGui {
      */
     private void placeBackButton() {
         ItemStack back = createItem(
-                Material.BARRIER,
+                Material.ARROW,
                 "&c&l← Back",
                 "&7Return to shop list"
         );

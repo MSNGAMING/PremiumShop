@@ -323,7 +323,7 @@ public final class ShopCategory {
 
         section.set("display-name",    displayName);
         section.set("slot",            slot);
-        section.set("icon",            icon.serialize());
+        section.set("icon",            icon != null ? icon.getType().name() : "CHEST");
         section.set("permission",      permission);
 
         // Decorator slots stored as a list for YAML friendliness
@@ -361,18 +361,32 @@ public final class ShopCategory {
         String displayName = section.getString("display-name", id);
 
         // Icon
-        ItemStack icon;
-        Object rawIconObj = section.get("icon");
-        if (rawIconObj instanceof ItemStack is) {
-            icon = is;
-        } else if (rawIconObj instanceof java.util.Map<?, ?> map) {
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> castMap = (java.util.Map<String, Object>) map;
-            icon = ItemStack.deserialize(castMap);
-        } else if (rawIconObj instanceof String matName) {
-            org.bukkit.Material mat = org.bukkit.Material.matchMaterial(matName);
-            icon = new ItemStack(mat != null ? mat : org.bukkit.Material.CHEST);
+        ItemStack icon = null;
+        if (section.isItemStack("icon")) {
+            icon = section.getItemStack("icon");
+        } else if (section.isConfigurationSection("icon")) {
+            ConfigurationSection iconSec = section.getConfigurationSection("icon");
+            if (iconSec != null) {
+                try {
+                    icon = ItemStack.deserialize(iconSec.getValues(false));
+                } catch (Exception ignored) {}
+            }
         } else {
+            Object rawIconObj = section.get("icon");
+            if (rawIconObj instanceof ItemStack is) {
+                icon = is;
+            } else if (rawIconObj instanceof java.util.Map<?, ?> map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> castMap = (java.util.Map<String, Object>) map;
+                try {
+                    icon = ItemStack.deserialize(castMap);
+                } catch (Exception ignored) {}
+            } else if (rawIconObj instanceof String matName) {
+                org.bukkit.Material mat = org.bukkit.Material.matchMaterial(matName);
+                if (mat != null) icon = new ItemStack(mat);
+            }
+        }
+        if (icon == null || icon.getType().isAir()) {
             icon = new ItemStack(org.bukkit.Material.CHEST);
         }
 

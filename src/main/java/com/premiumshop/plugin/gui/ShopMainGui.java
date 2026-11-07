@@ -68,9 +68,9 @@ public class ShopMainGui extends AbstractGui {
         fillBorder();
 
         if (shops.isEmpty()) {
-            // Show an informational barrier in the centre slot
-            setItem(26, createItem(
-                    Material.BARRIER,
+            // Show an informational chest in the centre slot
+            setItem(22, createItem(
+                    Material.CHEST,
                     "&c&lNo Shops Available",
                     "&7Ask an administrator to configure shops."
             ));

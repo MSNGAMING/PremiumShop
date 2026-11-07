@@ -264,6 +264,7 @@ public final class ShopItem {
         Objects.requireNonNull(section, "ConfigurationSection must not be null");
 
         section.set("display-item",          displayItem.serialize());
+        section.set("material",              displayItem.getType().name());
         section.set("base-buy-price",        baseBuyPrice);
         section.set("base-sell-price",       baseSellPrice);
         section.set("max-stock",             maxStock);
@@ -287,17 +288,40 @@ public final class ShopItem {
         Objects.requireNonNull(section, "ConfigurationSection must not be null");
 
         ItemStack displayItem = null;
-        Object rawItemObj = section.get("display-item");
-        if (rawItemObj instanceof ItemStack is) {
-            displayItem = is;
-        } else if (rawItemObj instanceof java.util.Map<?, ?> map) {
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> castMap = (java.util.Map<String, Object>) map;
-            displayItem = ItemStack.deserialize(castMap);
-        } else if (section.contains("material")) {
-            String matName = section.getString("material", "STONE");
-            org.bukkit.Material mat = org.bukkit.Material.matchMaterial(matName);
-            if (mat == null) mat = org.bukkit.Material.STONE;
+        if (section.isItemStack("display-item")) {
+            displayItem = section.getItemStack("display-item");
+        } else if (section.isConfigurationSection("display-item")) {
+            ConfigurationSection disSec = section.getConfigurationSection("display-item");
+            if (disSec != null) {
+                try {
+                    displayItem = ItemStack.deserialize(disSec.getValues(false));
+                } catch (Exception ignored) {}
+            }
+        } else {
+            Object rawItemObj = section.get("display-item");
+            if (rawItemObj instanceof ItemStack is) {
+                displayItem = is;
+            } else if (rawItemObj instanceof java.util.Map<?, ?> map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> castMap = (java.util.Map<String, Object>) map;
+                try {
+                    displayItem = ItemStack.deserialize(castMap);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        if (displayItem == null || displayItem.getType().isAir()) {
+            String matName = section.getString("material");
+            org.bukkit.Material mat = null;
+            if (matName != null && !matName.isBlank()) {
+                mat = org.bukkit.Material.matchMaterial(matName);
+            }
+            if (mat == null) {
+                mat = org.bukkit.Material.matchMaterial(id.toUpperCase(java.util.Locale.ROOT));
+            }
+            if (mat == null || mat.isAir()) {
+                mat = org.bukkit.Material.STONE;
+            }
             displayItem = new ItemStack(mat);
 
             org.bukkit.inventory.meta.ItemMeta meta = displayItem.getItemMeta();
@@ -316,10 +340,6 @@ public final class ShopItem {
                 }
                 displayItem.setItemMeta(meta);
             }
-        }
-
-        if (displayItem == null) {
-            displayItem = new ItemStack(org.bukkit.Material.BARRIER);
         }
 
         double  baseBuyPrice        = section.getDouble("base-buy-price",        0.0);

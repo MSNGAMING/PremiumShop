@@ -119,7 +119,7 @@ public class AuctionCreateGui extends AbstractGui {
         });
 
         // Cancel at slot 48
-        setItem(48, createItem(Material.BARRIER, "&c&lCancel"), event -> {
+        setItem(48, createItem(Material.ARROW, "&c&lCancel"), event -> {
             new AuctionMainGui(plugin, viewer).open();
         });
 
