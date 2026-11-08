@@ -78,8 +78,8 @@ public final class PremiumShopPlugin extends JavaPlugin {
 
         // ── 1. Save default resource files ──────────────────────────────
         saveDefaultConfig();
-        saveResource("shops.yml",    false);
-        saveResource("auctions.yml", false);
+        saveDefaultResource("shops.yml");
+        saveDefaultResource("auctions.yml");
 
         // ── 2. Config ────────────────────────────────────────────────────
         configManager = new ConfigManager(this);
@@ -198,6 +198,19 @@ public final class PremiumShopPlugin extends JavaPlugin {
     public void loadShopsData() {
         if (shopManager != null) {
             shopManager.reloadShops();
+        }
+    }
+
+    /**
+     * Saves a bundled resource to the data folder if it does not already exist,
+     * suppressing Bukkit's noisy warning when the file already exists on disk.
+     *
+     * @param resourcePath the relative resource path within the plugin jar
+     */
+    public void saveDefaultResource(final String resourcePath) {
+        final java.io.File file = new java.io.File(getDataFolder(), resourcePath);
+        if (!file.exists()) {
+            saveResource(resourcePath, false);
         }
     }
 
